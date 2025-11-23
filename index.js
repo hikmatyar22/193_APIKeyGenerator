@@ -131,7 +131,7 @@ app.post('/save-user', (req, res) => {
 });
 
 
-// --- ROUTE API ADMIN ---
+// --- ROUTE API ADMIN --
 
 // ROUTE: REGISTER ADMIN
 app.post('/admin/register', async (req, res) => {
