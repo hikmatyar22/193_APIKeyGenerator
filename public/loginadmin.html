@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Admin Login - Real Madrid API</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at center, #001a4d 0%, #000814 100%);
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.3), inset 0 0 15px rgba(0, 51, 153, 0.3);
+    padding: 40px;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    animation: fadeIn 1.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    color: #ffd700;
+    text-shadow: 0 0 15px #ffd700, 0 0 30px rgba(255, 255, 255, 0.3);
+    margin-bottom: 30px;
+    letter-spacing: 1.5px;
+    font-size: 1.6rem;
+}
+
+.logo {
+    width: 80px;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+    animation: float 3s ease-in-out infinite;
+}
+
+.form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffd700;
+    text-align: center;
+    font-size: 15px;
+    margin-bottom: 18px;
+    outline: none;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus {
+    border-color: #003399;
+    box-shadow: 0 0 10px rgba(0, 51, 153, 0.5);
+}
+
+input::placeholder {
+    color: #aaa;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(90deg, #003399, #ffd700);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    transition: all 0.3s ease;
+    margin-bottom: 18px;
+}
+
+button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.6), 0 0 35px rgba(0, 51, 153, 0.6);
+}
+
+#toggleButton {
+    background: linear-gradient(90deg, #003399, #ffd700);
+    margin-bottom: 0;
+}
+
+.message {
+    margin-bottom: 15px;
+    color: red;
+    font-weight: 600;
+    min-height: 20px; 
+    text-align: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <img src="https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg" class="logo" alt="Logo">
+    <h1 id="formTitle">ADMIN LOGIN</h1>
+
+    <div id="message" class="message"></div>
+
+    <div class="form-group" id="formFields">
+        <input id="email" type="email" placeholder="Email Admin">
+        <input id="password" type="password" placeholder="Password">
+        <input id="confirm_password" type="password" placeholder="Konfirmasi Password" style="display:none;">
+    </div>
+
+    <div class="form-group" id="formActions">
+        <button id="mainButton" onclick="handleLogin()">LOGIN</button>
+        <button id="toggleButton" onclick="toggleForm()">Belum punya akun? Registrasi</button>
+    </div>
+</div>
+
+<script>
+let isLoginForm = true;
+const formTitle = document.getElementById('formTitle');
+const pageTitle = document.getElementById('pageTitle');
+const mainButton = document.getElementById('mainButton');
+const toggleButton = document.getElementById('toggleButton');
+const confirmPasswordInput = document.getElementById('confirm_password');
+const messageDiv = document.getElementById('message');
+
+function toggleForm() {
+    isLoginForm = !isLoginForm;
+    messageDiv.textContent = '';
+
+    if (!isLoginForm) {
+        formTitle.textContent = "ADMIN REGISTRASI";
+        pageTitle.textContent = "Admin Registrasi - Real Madrid API";
+        mainButton.textContent = "REGISTER";
+        mainButton.setAttribute('onclick', 'handleRegister()');
+        toggleButton.textContent = "Kembali ke Login";
+        confirmPasswordInput.style.display = 'block';
+    } else {
+        formTitle.textContent = "ADMIN LOGIN";
+        pageTitle.textContent = "Admin Login - Real Madrid API";
+        mainButton.textContent = "LOGIN";
+        mainButton.setAttribute('onclick', 'handleLogin()');
+        toggleButton.textContent = "Belum punya akun? Registrasi";
+        confirmPasswordInput.style.display = 'none';
+    }
+}
+
+async function handleLogin() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    if (!email || !password) { messageDiv.textContent = "Email dan Password wajib diisi!"; return; }
+
+    messageDiv.textContent = "Processing...";
+    const response = await fetch('/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
+    const data = await response.json();
+    if (data.success) {
+        alert("Login Berhasil!");
+        window.location.href = 'dashboardadmin.html';
+    } else {
+        messageDiv.textContent = data.message || "Login Gagal, cek kredensial Anda.";
+    }
+}
+
+async function handleRegister() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const confirmPassword = document.getElementById('confirm_password').value.trim();
+
+    if (!email || !password || !confirmPassword) {
+        messageDiv.textContent = "Semua field wajib diisi!"; return;
+    }
+    if (password !== confirmPassword) { messageDiv.textContent = "Password dan Konfirmasi Password tidak cocok!"; return; }
+
+    messageDiv.textContent = "Processing...";
+    const response = await fetch('/admin/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
+    const data = await response.json();
+    if (data.success) {
+        messageDiv.textContent = data.message + " Sekarang silakan Login.";
+        alert("Registrasi Berhasil!");
+        toggleForm();
+    } else {
+        messageDiv.textContent = data.message || "Registrasi Gagal. Coba lagi.";
+    }
+}
+</script>
+</body>
+</html>
