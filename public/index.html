@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Madrid API Key Management</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap');
+
+        :root {
+            --primary-blue: #003399;
+            --secondary-gold: #ffd700;
+            --dark-bg: #000814;
+            --border-color: rgba(255, 215, 0, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --spacing: 20px;
+            --disabled-color: #555; /* Warna abu-abu untuk disabled */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, var(--primary-blue) 0%, var(--dark-bg) 100%);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(15px);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 0 25px var(--border-color), inset 0 0 15px rgba(0, 51, 153, 0.3);
+            padding: 40px;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--secondary-gold);
+            text-shadow: 0 0 15px var(--secondary-gold), 0 0 30px rgba(255, 255, 255, 0.3);
+            margin: 15px 0 30px; 
+            font-size: 1.5rem;
+        }
+
+        .logo {
+            width: 80px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+            animation: float 3s ease-in-out infinite; 
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+
+        input {
+            width: calc(100% - 24px); 
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--secondary-gold);
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: var(--spacing); 
+            outline: none;
+            font-size: 15px;
+            text-align: center;
+        }
+        
+        button {
+            background: linear-gradient(90deg, var(--primary-blue), var(--secondary-gold));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 28px; 
+            font-size: 16px; 
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--border-color);
+            margin-bottom: var(--spacing); 
+            width: 100%; 
+        }
+
+        button:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 0 25px var(--border-color), 0 0 35px rgba(0, 51, 153, 0.6);
+        }
+
+        button:disabled {
+            background: var(--disabled-color); 
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+
+        /* Tombol Copy dan Textarea */
+        .btn-create { margin-bottom: 10px; }
+        .textarea-wrapper { position: relative; width: 100%; margin-bottom: 10px; }
+        textarea {
+            width: calc(100% - 24px); 
+            height: 80px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            resize: none;
+            background: var(--input-bg);
+            color: var(--secondary-gold);
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.3);
+            outline: none;
+        }
+        .copy-btn-bottom {
+            background: var(--secondary-gold);
+            color: var(--dark-bg);
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 13px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            width: auto;
+            margin: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease-in-out;
+            display: inline-block;
+            float: right;
+            margin-top: -10px; 
+        }
+        .copy-btn-bottom:hover { background-color: #ffc400; transform: scale(1.05); }
+
+        /* Tombol bawah: Add User & Login Admin */
+        .btn-group-bottom {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        .btn-group-bottom button {
+            width: 50%;
+            margin: 0;
+            padding: 12px 10px;
+            font-size: 14px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        /* Tombol Add User hanya yang disabled awal */
+        #addUserBtn {
+            background: var(--disabled-color);
+        }
+
+        /* Tombol Login Admin tetap biru dari awal */
+        #loginAdminBtn {
+            background: var(--primary-blue);
+        }
+
+        /* Tombol aktif & hover untuk Add User & Login Admin */
+        #addUserBtn.active, #loginAdminBtn.active {
+            background: var(--primary-blue);
+            color: #fff;
+        }
+        #addUserBtn.active:hover, #loginAdminBtn.active:hover {
+            background: #004c99;
+            transform: scale(1.02);
+        }
+
+        /* Popup User */
+        .popup {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 380px;
+            padding: 30px; 
+            background: rgba(0, 0, 0, 0.85); 
+            border: 2px solid var(--secondary-gold);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            display: none;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); 
+            z-index: 1000;
+        }
+        .popup h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--secondary-gold);
+            margin-bottom: 25px; 
+            font-size: 1.3rem;
+        }
+        .popup input, .popup select {
+            width: calc(100% - 24px); 
+            padding: 12px;
+            margin-bottom: 18px; 
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--secondary-gold);
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+        }
+        .popup button {
+            width: 100%;
+            margin-top: 20px; 
+            padding: 14px;
+        }
+        .popup .close-btn {
+            background: linear-gradient(90deg, #cc0000, #ff4444); 
+            margin-top: 10px; 
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg" class="logo" alt="Real Madrid Logo">
+        <h1>REAL MADRID API KEY</h1>
+        
+        <input id="service_name_key" type="text" placeholder="Masukkan nama service untuk API Key">
+
+        <div class="key-input-area">
+            <button onclick="buatApiKey()" class="btn-create">Buat API Key</button>
+        </div>
+        
+        <div class="textarea-wrapper">
+            <textarea id="apikey_display" readonly placeholder="API Key yang baru dibuat akan muncul di sini..."></textarea>
+            <button onclick="copyApiKey()" class="copy-btn-bottom" id="copyBtn" disabled>Copy</button> 
+        </div>
+        
+        <div class="btn-group-bottom" id="bottomButtons">
+            <button id="addUserBtn" onclick="openUserForm()" disabled>Add User</button>
+            <button id="loginAdminBtn" onclick="goToAdminLogin()">Login Admin</button>
+        </div>
+
+        <footer>Powered by <span>Los Blancos Tech</span></footer>
+    </div>
+
+    <div id="userPopup" class="popup">
+        <h3 style="text-align:center;">Tambah User Baru</h3>
+        <input id="f_name" type="text" placeholder="First Name">
+        <input id="l_name" type="text" placeholder="Last Name">
+        <input id="email" type="email" placeholder="Email">
+        <select id="select_api_key">
+            <option value="">Pilih API Key (Belum Terpakai)...</option>
+        </select>
+        <button onclick="saveUser()">Save User</button>
+        <button class="close-btn" onclick="closeUserForm()">Cancel</button>
+    </div>
+
+    <script>
+        // DOM ELEMENTS
+        const addUserBtn = document.getElementById('addUserBtn');
+        const loginAdminBtn = document.getElementById('loginAdminBtn');
+        const copyBtn = document.getElementById('copyBtn');
+
+        function setButtonsActive(isActive) {
+            if (isActive) {
+                addUserBtn.disabled = false;
+                addUserBtn.classList.add('active');
+                copyBtn.disabled = false;
+            } else {
+                addUserBtn.disabled = true;
+                addUserBtn.classList.remove('active');
+                copyBtn.disabled = true;
+                document.getElementById('apikey_display').value = ''; 
+            }
+        }
+
+        function goToAdminLogin() {
+            window.location.href = 'loginadmin.html';
+        }
+
+        function openUserForm(defaultApiKey = null) {
+            loadApiKeys(defaultApiKey); 
+            document.getElementById("userPopup").style.display = "block";
+        }
+
+        function closeUserForm() {
+            document.getElementById("userPopup").style.display = "none";
+            document.getElementById("f_name").value = '';
+            document.getElementById("l_name").value = '';
+            document.getElementById("email").value = '';
+            document.getElementById("select_api_key").value = '';
+        }
+
+        async function loadApiKeys(defaultKey = null) {
+            const select = document.getElementById("select_api_key");
+            select.innerHTML = '<option value="">Loading...</option>';
+            try {
+                const res = await fetch('/get-apikeys');
+                const data = await res.json();
+                select.innerHTML = '<option value="">Pilih API Key (Belum Terpakai)...</option>';
+                data.forEach(item => {
+                    const opt = document.createElement("option");
+                    opt.value = item.api_key;
+                    opt.textContent = `${item.service_name} - ${item.api_key.substring(0, 15)}...`; 
+                    select.appendChild(opt);
+                });
+                if (defaultKey) select.value = defaultKey;
+            } catch (error) {
+                console.error("Error loading API keys:", error);
+                select.innerHTML = '<option value="">Gagal memuat API Keys</option>';
+            }
+        }
+
+        async function saveUser() {
+            const user = {
+                first_name: document.getElementById("f_name").value.trim(),
+                last_name: document.getElementById("l_name").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                api_key: document.getElementById("select_api_key").value
+            };
+            if (!user.first_name || !user.last_name || !user.email || !user.api_key) {
+                return alert("Semua field wajib diisi dan API Key harus dipilih!");
+            }
+            const res = await fetch('/save-user', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(user)
+            });
+            const data = await res.json();
+            alert(data.message);
+            if (data.success) {
+                closeUserForm();
+                setButtonsActive(false); 
+            }
+        }
+
+        async function buatApiKey() {
+            const serviceName = document.getElementById('service_name_key').value.trim();
+            const textarea = document.getElementById('apikey_display');
+            if (!serviceName) return alert("Masukkan nama service untuk API Key!");
+            textarea.value = "🔄 Membuat API Key...";
+            setButtonsActive(false);
+            try {
+                const response = await fetch('/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ service_name: serviceName })
+                });
+                const data = await response.json();
+                if (data.apiKey) {
+                    textarea.value = data.apiKey;
+                    alert(`✅ API Key berhasil dibuat: ${data.apiKey}.`);
+                    document.getElementById('service_name_key').value = ''; 
+                    setButtonsActive(true); 
+                    addUserBtn.onclick = () => openUserForm(data.apiKey); 
+                } else {
+                    textarea.value = data.error || "Gagal membuat API Key.";
+                    alert(data.error || "Gagal membuat API Key.");
+                }
+            } catch (error) {
+                console.error("Error creating API Key:", error);
+                textarea.value = "Gagal menghubungi server.";
+                alert("Gagal menghubungi server.");
+            }
+        }
+
+        function copyApiKey() {
+            const apiKey = document.getElementById('apikey_display').value;
+            if (!apiKey || apiKey.startsWith('🔄')) return alert("Belum ada API Key!");
+            navigator.clipboard.writeText(apiKey)
+                .then(() => alert("Copied!"))
+                .catch(err => {
+                    console.error('Could not copy text: ', err);
+                    alert("Gagal menyalin. Coba salin manual.");
+                });
+        }
+    </script>
+
+</body>
+</html>

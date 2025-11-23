@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Real Madrid API</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #001a4d 0%, #000814 100%);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+            font-size: 2.5rem;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            color: #003399;
+            background: #ffd700;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        th, td {
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: rgba(0, 51, 153, 0.8);
+            color: #ffd700;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .status-on {
+            color: #28a745; /* Green */
+            font-weight: bold;
+        }
+
+        .status-off {
+            color: #dc3545; /* Red */
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            float: right;
+            transition: background-color 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .delete-btn {
+            background: #dc3545; 
+            color: white; 
+            border: none; 
+            padding: 5px 10px; 
+            border-radius: 5px; 
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <header>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+            <h1>ADMIN DASHBOARD</h1>
+        </header>
+
+        <h2 class="section-title">List Users</h2>
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th> 
+                    <th>Email</th>
+                    <th>API Key</th>
+                    <th>Created At</th>
+                    <th>Status</th> 
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+
+        <h2 class="section-title">List API Keys</h2>
+        <table id="apikeyTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Service Name</th>
+                    <th>API Key</th>
+                    <th>Created At</th>
+                    <th>Out of Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Data API Keys yang diambil dari server akan disimpan di sini
+        let apiKeysData = []; 
+
+        // Fungsi untuk menangani Logout (redirect ke index)
+        function logout() {
+            alert("Anda telah logout.");
+            window.location.href = 'index.html';
+        }
+
+        // --- FUNGSI HAPUS USER --- (Tidak Berubah)
+        async function deleteUser(userId) {
+            if (!confirm(`Apakah Anda yakin ingin menghapus User ID ${userId}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/users/${userId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    loadUsers(); // Muat ulang tabel
+                } else {
+                    alert(`Gagal menghapus User: ${data.message}`);
+                }
+            } catch (error) {
+                console.error("Error deleting user:", error);
+                alert("Terjadi kesalahan server saat menghapus User.");
+            }
+        }
+
+        // --- FUNGSI HAPUS API KEY --- (Tidak Berubah)
+        async function deleteApiKey(apiKeyId) {
+            if (!confirm(`Apakah Anda yakin ingin menghapus API Key ID ${apiKeyId}? Tindakan ini TIDAK dapat dibatalkan.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/apikeys/${apiKeyId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    loadUsers(); 
+                    loadApiKeys(); 
+                } else {
+                    alert(`Gagal menghapus API Key: ${data.message}`);
+                }
+            } catch (error) {
+                console.error("Error deleting API Key:", error);
+                alert("Terjadi kesalahan server saat menghapus API Key.");
+            }
+        }
+
+        // --- FUNGSI LOAD API KEYS --- (Diubah untuk menyimpan data di variabel global)
+        async function loadApiKeys() {
+            const tableBody = document.getElementById('apikeyTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading API Keys...</td></tr>'; 
+            apiKeysData = []; // Reset data global
+
+            try {
+                const response = await fetch('/admin/apikeys');
+                const apikeys = await response.json();
+                apiKeysData = apikeys; // Simpan data API Keys
+                
+                tableBody.innerHTML = ''; 
+
+                if (apikeys.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Tidak ada data API Key.</td></tr>';
+                    return;
+                }
+
+                const today = new Date();
+                
+                apikeys.forEach(key => {
+                    const row = tableBody.insertRow();
+                    const outOfDate = new Date(key.out_of_date);
+                    
+                    // Logic Status ON/OFF
+                    const statusText = (outOfDate > today) ? 'ON' : 'OFF';
+                    const statusClass = (outOfDate > today) ? 'status-on' : 'status-off';
+
+                    row.insertCell(0).textContent = key.id;
+                    row.insertCell(1).textContent = key.service_name;
+                    row.insertCell(2).textContent = key.api_key;
+                    row.insertCell(3).textContent = new Date(key.created_at).toLocaleString();
+                    row.insertCell(4).textContent = outOfDate.toLocaleDateString();
+                    
+                    const statusCell = row.insertCell(5);
+                    statusCell.textContent = statusText;
+                    statusCell.classList.add(statusClass);
+
+                    // Tambahkan Tombol Hapus
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Hapus';
+                    deleteButton.classList.add('delete-btn');
+                    deleteButton.onclick = () => deleteApiKey(key.id);
+                    row.insertCell(6).appendChild(deleteButton);
+                });
+                
+                // Setelah API Keys dimuat, muat Users
+                loadUsers();
+
+            } catch (error) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="color:red;text-align:center;">Gagal memuat data API Keys.</td></tr>';
+                console.error("Error loading API Keys:", error);
+            }
+        }
+
+        // --- FUNGSI LOAD USERS (Diubah untuk Full Name dan Status Key) ---
+        async function loadUsers() {
+            const tableBody = document.getElementById('userTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading users...</td></tr>'; 
+
+            // Pastikan apiKeysData sudah terisi
+            if (apiKeysData.length === 0) {
+                 tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">API Keys belum dimuat. Mohon tunggu.</td></tr>';
+                 return;
+            }
+
+            try {
+                const response = await fetch('/admin/users');
+                const users = await response.json();
+                
+                tableBody.innerHTML = ''; 
+
+                if (users.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Tidak ada data user.</td></tr>';
+                    return;
+                }
+
+                const today = new Date();
+
+                users.forEach(user => {
+                    const row = tableBody.insertRow();
+                    
+                    // Cari API Key yang sesuai untuk User ini
+                    const relatedApiKey = apiKeysData.find(key => key.api_key === user.api_key);
+                    
+                    let statusText = 'OFF (No Key)';
+                    let statusClass = 'status-off';
+
+                    if (relatedApiKey) {
+                        const outOfDate = new Date(relatedApiKey.out_of_date);
+                        statusText = (outOfDate > today) ? 'ON' : 'OFF';
+                        statusClass = (outOfDate > today) ? 'status-on' : 'status-off';
+                    }
+
+                    row.insertCell(0).textContent = user.id;
+                    // Kolom 1: Full Name
+                    row.insertCell(1).textContent = `${user.first_name} ${user.last_name}`; 
+                    row.insertCell(2).textContent = user.email;
+                    row.insertCell(3).textContent = user.api_key;
+                    row.insertCell(4).textContent = new Date(user.created_at).toLocaleString();
+                    
+                    // Kolom 5: Status
+                    const statusCell = row.insertCell(5);
+                    statusCell.textContent = statusText;
+                    statusCell.classList.add(statusClass);
+
+                    // Kolom 6: Action (Tombol Hapus)
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Hapus';
+                    deleteButton.classList.add('delete-btn');
+                    deleteButton.onclick = () => deleteUser(user.id);
+                    row.insertCell(6).appendChild(deleteButton);
+                });
+
+            } catch (error) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="color:red;text-align:center;">Gagal memuat data user.</td></tr>';
+                console.error("Error loading users:", error);
+            }
+        }
+
+        // Jalankan loadApiKeys saat halaman dimuat. loadApiKeys akan memanggil loadUsers setelah selesai.
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApiKeys();
+        });
+    </script>
+</body>
+</html>
